@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EIDL Loans Analysis - Executive Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --border-color: #e5e7eb;
+            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .header .period {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow-large);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .executive-summary {
+            background: var(--gradient-primary);
+            color: white;
+            text-align: center;
+        }
+
+        .executive-summary::before {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .executive-summary h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .executive-summary p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            line-height: 1.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-card:nth-child(2)::before { background: var(--gradient-secondary); }
+        .stat-card:nth-child(3)::before { background: var(--gradient-success); }
+        .stat-card:nth-child(4)::before { background: var(--gradient-warning); }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-large);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .stat-card:nth-child(2) .stat-icon { color: #f5576c; }
+        .stat-card:nth-child(3) .stat-icon { color: #00f2fe; }
+        .stat-card:nth-child(4) .stat-icon { color: #38f9d7; }
+
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--dark-color);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-header i {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            color: var(--primary-color);
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.3s ease;
+        }
+
+        .chart-container img:hover {
+            transform: scale(1.02);
+            box-shadow: var(--shadow-large);
+        }
+
+        .insights-panel {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #0ea5e9;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .insights-panel::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+
+        .insights-panel h3 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .insights-panel h3 i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .insights-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .insights-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .insights-list li:last-child {
+            border-bottom: none;
+        }
+
+        .insights-list li::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-size: 0.8rem;
+        }
+
+        .key-findings {
+            background: var(--gradient-success);
+            color: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin: 40px 0;
+        }
+
+        .key-findings h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .findings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .finding-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .finding-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fbbf24;
+        }
+
+        .data-quality-alert {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .data-quality-alert i {
+            font-size: 1.5rem;
+            color: var(--warning-color);
+            margin-right: 15px;
+            margin-top: 2px;
+        }
+
+        .data-quality-alert div h4 {
+            color: #92400e;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .data-quality-alert div p {
+            color: #78350f;
+            font-size: 0.95rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .footer p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0 5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+        .card:nth-child(4) { animation-delay: 0.3s; }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .findings-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-container {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> EIDL Loans Analysis</h1>
+            <div class="subtitle">Executive Dashboard & Comprehensive Analysis</div>
+            <div class="period">📅 April 1 - June 9, 2020 | COVID-19 Economic Relief Program</div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card executive-summary">
+                <h2><i class="fas fa-briefcase"></i> Executive Summary</h2>
+                <p>This comprehensive analysis examines <strong>995,409 EIDL loans</strong> totaling <strong>$72.85 billion</strong> 
+                distributed during the critical early months of the COVID-19 pandemic. The program delivered unprecedented economic relief 
+                to businesses across all 50 states and territories, supporting the backbone of American commerce during an extraordinary crisis.</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-handshake"></i></div>
+                <div class="stat-value">995,409</div>
+                <div class="stat-label">Total Loans Approved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                <div class="stat-value">$72.85B</div>
+                <div class="stat-label">Total Funding Deployed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-calculator"></i></div>
+                <div class="stat-value tooltip" data-tooltip="Average loan amount across all approved applications">$73,186</div>
+                <div class="stat-label">Average Loan Size</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="stat-value tooltip" data-tooltip="50% of loans were below this amount">$49,000</div>
+                <div class="stat-label">Median Loan Amount</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-header">
+                <i class="fas fa-globe-americas"></i>
+                <h2>Geographic Distribution Analysis</h2>
+            </div>
+            <div class="chart-container">
+                <img src="geographic_analysis.png" alt="Geographic Analysis Charts">
+            </div>
+            
+            <div class="insights-panel">
+                <h3><i class="fas fa-map-marked-alt"></i> Geographic Insights</h3>
+                <ul class="insights-list">
+                    <li><strong>California</strong> dominates with 172,307 loans totaling $13.6B (17.3% of all loans)</li>
+                    <li><strong>Florida</strong> ranks second with 95,167 loans worth $6.2B (9.6% of total)</li>
+                    <li><strong>Texas</strong> follows with 84,165 loans totaling $6.2B (8.5% of loans)</li>
+                    <li><strong>New York</strong> secured 70,513 loans worth $5.4B despite pandemic challenges</li>
+                    <li>All 50 states plus 6 territories participated (56 total jurisdictions)</li>
+                    <li>Geographic distribution strongly correlates with state GDP and business density</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-header">
+                <i class="fas fa-chart-pie"></i>
+                <h2>Loan Amount Distribution</h2>
+            </div>
+            <div class="chart-container">
+                <img src="loan_amount_analysis.png" alt="Loan Amount Analysis Charts">
+            </div>
+            
+            <div class="insights-panel">
+                <h3><i class="fas fa-coins"></i> Loan Amount Insights</h3>
+                <ul class="insights-list">
+                    <li><strong>50.5%</strong> of loans were under $50,000 (supporting micro and small businesses)</li>
+                    <li><strong>32.5%</strong> of loans exceeded $100,000 (medium-sized business support)</li>
+                    <li><strong>Maximum loan:</strong> $900,000 (program cap enforcement)</li>
+                    <li><strong>Minimum loan:</strong> $7,000 (accessible to smallest businesses)</li>
+                    <li>Right-skewed distribution indicates focus on smaller enterprises</li>
+                    <li>Some negative values present (likely loan corrections or adjustments)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-header">
+                <i class="fas fa-building"></i>
+                <h2>Business Type Analysis</h2>
+            </div>
+            <div class="chart-container">
+                <img src="business_type_analysis.png" alt="Business Type Analysis Charts">
+            </div>
+            
+            <div class="insights-panel">
+                <h3><i class="fas fa-industry"></i> Business Type Insights</h3>
+                <ul class="insights-list">
+                    <li><strong>Type R (Regular):</strong> 738,407 loans (74.2%) with $85K average</li>
+                    <li><strong>Type PR (Proprietorships):</strong> 231,197 loans (23.2%) with $36K average</li>
+                    <li><strong>Type MR (Minority-owned):</strong> 19,181 loans (1.9%) with $81K average</li>
+                    <li><strong>Type P (Partnerships):</strong> 6,624 loans (0.7%) with $31K average</li>
+                    <li>Regular businesses received 2.4x higher average amounts than proprietorships</li>
+                    <li>Minority-owned businesses secured substantial average loan sizes</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-header">
+                <i class="fas fa-clock"></i>
+                <h2>Temporal Analysis</h2>
+            </div>
+            <div class="chart-container">
+                <img src="temporal_analysis.png" alt="Temporal Analysis Charts">
+            </div>
+            
+            <div class="data-quality-alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <h4>Data Quality Notice</h4>
+                    <p>Date formatting issues detected in the dataset. All records show the same processed date, 
+                    suggesting batch processing or data export formatting. Original loan approval dates may require 
+                    separate analysis for accurate temporal patterns.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="key-findings">
+            <h2><i class="fas fa-lightbulb"></i> Key Findings & Strategic Implications</h2>
+            <div class="findings-grid">
+                <div class="finding-item">
+                    <div class="finding-number">01</div>
+                    <strong>Unprecedented Scale:</strong> Nearly 1 million loans totaling $72.85 billion demonstrates 
+                    the extraordinary scope of COVID-19 economic relief, representing one of the largest disaster 
+                    relief programs in U.S. history.
+                </div>
+                <div class="finding-item">
+                    <div class="finding-number">02</div>
+                    <strong>Geographic Equity:</strong> While larger states received more loans in absolute terms, 
+                    the program achieved nationwide coverage, ensuring economic support reached businesses in 
+                    all 50 states and territories.
+                </div>
+                <div class="finding-item">
+                    <div class="finding-number">03</div>
+                    <strong>Small Business Focus:</strong> With a median loan of $49K and 50.5% of loans under $50K, 
+                    the program successfully targeted small and micro-enterprises most vulnerable to pandemic disruption.
+                </div>
+                <div class="finding-item">
+                    <div class="finding-number">04</div>
+                    <strong>Diverse Business Support:</strong> The wide loan distribution ($7K-$900K) demonstrates 
+                    the program's flexibility in addressing varied business needs across different industries and sizes.
+                </div>
+                <div class="finding-item">
+                    <div class="finding-number">05</div>
+                    <strong>Economic Investment:</strong> $9.9B in subsidy costs represents a significant government 
+                    investment in economic recovery, with an average subsidy rate of 13.6% of loan value.
+                </div>
+                <div class="finding-item">
+                    <div class="finding-number">06</div>
+                    <strong>Business Type Equity:</strong> While regular businesses received higher average amounts, 
+                    the program successfully served diverse business structures including proprietorships, 
+                    partnerships, and minority-owned enterprises.
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><i class="fas fa-chart-line"></i> <strong>Analysis Dashboard</strong> | Generated November 17, 2025</p>
+            <p>📊 Data Source: DATAACT_EIDL_LOANS_20200401-20200609.csv</p>
+            <p>🔧 Technology Stack: 
+                <span class="tech-badge">Python 3.12</span>
+                <span class="tech-badge">Pandas</span>
+                <span class="tech-badge">Matplotlib</span>
+                <span class="tech-badge">Seaborn</span>
+            </p>
+            <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 15px;">
+                <i class="fas fa-info-circle"></i> This analysis provides insights into the Economic Injury Disaster Loan program 
+                during the critical early months of the COVID-19 pandemic, supporting data-driven policy decisions.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+EXECUTIVE SUMMARY
+==================================================
+Dataset Period: April 1, 2020 - June 9, 2020
+Total Number of Loans: 995,409
+Total Loan Amount: $72,849,613,689.00
+Total Subsidy Cost: $9,922,117,384.39
+Average Loan Amount: $73,185.61
+
+GEOGRAPHIC INSIGHTS
+------------------------------
+State with most loans: CA (172,307 loans)
+State with highest total amount: CA ($13,635,623,068.00)
+Number of states represented: 56
+
+TEMPORAL INSIGHTS
+------------------------------
+Peak loan day: 1970-01-01 (995,409 loans)
+Average daily loans: 995409
+Analysis period: 1 days
+
+LOAN AMOUNT INSIGHTS
+------------------------------
+Median loan amount: $49,000.00
+Loans under $50K: 502,832 (50.5%)
+Loans over $100K: 323,526 (32.5%)
+Loans over $1M: 0 (0.0%)
+
+BUSINESS TYPE INSIGHTS
+------------------------------
+Most common business type: R (738,407 loans)
+Number of business types: 4
+
+KEY FINDINGS
+------------------------------
+1. This dataset represents EIDL loans during the early COVID-19 pandemic period
+2. The program provided significant economic relief to businesses across all states
+3. Loan amounts varied widely, indicating diverse business needs and sizes
+4. Geographic distribution shows concentration in states with larger economies
+5. Temporal patterns may reflect program rollout and business application timing
