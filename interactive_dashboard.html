@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EIDL Loans Analysis - Interactive Executive Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --border-color: #e5e7eb;
+            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .header .period {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 5px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            margin: 0 5px;
+            background: transparent;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow-large);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .executive-summary {
+            background: var(--gradient-primary);
+            color: white;
+            text-align: center;
+        }
+
+        .executive-summary::before {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .executive-summary h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .executive-summary p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            line-height: 1.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-card:nth-child(2)::before { background: var(--gradient-secondary); }
+        .stat-card:nth-child(3)::before { background: var(--gradient-success); }
+        .stat-card:nth-child(4)::before { background: var(--gradient-warning); }
+
+        .stat-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: var(--shadow-large);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:nth-child(2) .stat-icon { color: #f5576c; }
+        .stat-card:nth-child(3) .stat-icon { color: #00f2fe; }
+        .stat-card:nth-child(4) .stat-icon { color: #38f9d7; }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--dark-color);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            height: 400px;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 4px;
+            transition: width 2s ease;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .metric-value {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .footer p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0 5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-container {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .nav-tab {
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> EIDL Loans Analysis</h1>
+            <div class="subtitle">Interactive Executive Dashboard</div>
+            <div class="period">📅 April 1 - June 9, 2020 | COVID-19 Economic Relief Program</div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('overview')">
+                <i class="fas fa-tachometer-alt"></i> Overview
+            </button>
+            <button class="nav-tab" onclick="showTab('geographic')">
+                <i class="fas fa-globe-americas"></i> Geographic
+            </button>
+            <button class="nav-tab" onclick="showTab('business')">
+                <i class="fas fa-building"></i> Business Types
+            </button>
+            <button class="nav-tab" onclick="showTab('analytics')">
+                <i class="fas fa-chart-bar"></i> Analytics
+            </button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="card executive-summary animate-in">
+                    <h2><i class="fas fa-briefcase"></i> Executive Summary</h2>
+                    <p>This comprehensive analysis examines <strong>995,409 EIDL loans</strong> totaling <strong>$72.85 billion</strong> 
+                    distributed during the critical early months of the COVID-19 pandemic. The program delivered unprecedented economic relief 
+                    to businesses across all 50 states and territories, supporting the backbone of American commerce during an extraordinary crisis.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card animate-in" onclick="animateCard(this)">
+                    <div class="stat-icon"><i class="fas fa-handshake"></i></div>
+                    <div class="stat-value" data-target="995409">0</div>
+                    <div class="stat-label">Total Loans Approved</div>
+                </div>
+                <div class="stat-card animate-in" onclick="animateCard(this)">
+                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-value" data-target="72.85">$0B</div>
+                    <div class="stat-label">Total Funding Deployed</div>
+                </div>
+                <div class="stat-card animate-in" onclick="animateCard(this)">
+                    <div class="stat-icon"><i class="fas fa-calculator"></i></div>
+                    <div class="stat-value" data-target="73186">$0</div>
+                    <div class="stat-label">Average Loan Size</div>
+                </div>
+                <div class="stat-card animate-in" onclick="animateCard(this)">
+                    <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="stat-value" data-target="49000">$0</div>
+                    <div class="stat-label">Median Loan Amount</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geographic Tab -->
+        <div id="geographic" class="tab-content">
+            <div class="card">
+                <h2 class="chart-title"><i class="fas fa-map-marked-alt"></i> Top States by Loan Volume</h2>
+                <div class="chart-container">
+                    <canvas id="statesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="chart-title">State Performance Metrics</h2>
+                <div class="metric-row">
+                    <span class="metric-label">California</span>
+                    <span class="metric-value">172,307 loans ($13.6B)</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Florida</span>
+                    <span class="metric-value">95,167 loans ($6.2B)</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 55%"></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Texas</span>
+                    <span class="metric-value">84,165 loans ($6.2B)</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 49%"></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">New York</span>
+                    <span class="metric-value">70,513 loans ($5.4B)</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 41%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Types Tab -->
+        <div id="business" class="tab-content">
+            <div class="card">
+                <h2 class="chart-title"><i class="fas fa-industry"></i> Business Type Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="businessChart"></canvas>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-building"></i></div>
+                    <div class="stat-value">738,407</div>
+                    <div class="stat-label">Regular Businesses (74.2%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="stat-value">231,197</div>
+                    <div class="stat-label">Proprietorships (23.2%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-diversity"></i></div>
+                    <div class="stat-value">19,181</div>
+                    <div class="stat-label">Minority-owned (1.9%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-handshake"></i></div>
+                    <div class="stat-value">6,624</div>
+                    <div class="stat-label">Partnerships (0.7%)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="card">
+                <h2 class="chart-title"><i class="fas fa-chart-pie"></i> Loan Amount Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="chart-title">Key Performance Indicators</h2>
+                <div class="metric-row">
+                    <span class="metric-label">Loans Under $50K</span>
+                    <span class="metric-value">50.5% (502,832 loans)</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Loans $50K-$100K</span>
+                    <span class="metric-value">17.0% (169,051 loans)</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Loans Over $100K</span>
+                    <span class="metric-value">32.5% (323,526 loans)</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Average Subsidy Rate</span>
+                    <span class="metric-value">13.6% of loan value</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Total Subsidy Cost</span>
+                    <span class="metric-value">$9.92 Billion</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><i class="fas fa-chart-line"></i> <strong>Interactive Analysis Dashboard</strong> | Generated November 17, 2025</p>
+            <p>📊 Data Source: DATAACT_EIDL_LOANS_20200401-20200609.csv</p>
+            <p>🔧 Technology Stack: 
+                <span class="tech-badge">HTML5</span>
+                <span class="tech-badge">CSS3</span>
+                <span class="tech-badge">JavaScript</span>
+                <span class="tech-badge">Chart.js</span>
+                <span class="tech-badge">GSAP</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+            
+            // Initialize charts for the active tab
+            setTimeout(() => {
+                initializeCharts(tabName);
+            }, 100);
+        }
+
+        // Animate stat cards
+        function animateCard(card) {
+            gsap.to(card, {
+                scale: 1.05,
+                duration: 0.1,
+                yoyo: true,
+                repeat: 1
+            });
+        }
+
+        // Counter animation for stat values
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-value[data-target]');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const isMonetary = counter.textContent.includes('$');
+                const isBillion = counter.textContent.includes('B');
+                
+                let current = 0;
+                const increment = target / 100;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    
+                    if (isMonetary && isBillion) {
+                        counter.textContent = `$${(current / 1000000000).toFixed(2)}B`;
+                    } else if (isMonetary) {
+                        counter.textContent = `$${Math.floor(current).toLocaleString()}`;
+                    } else {
+                        counter.textContent = Math.floor(current).toLocaleString();
+                    }
+                }, 20);
+            });
+        }
+
+        // Initialize charts
+        function initializeCharts(tabName) {
+            if (tabName === 'geographic' && !window.statesChartInitialized) {
+                initStatesChart();
+                window.statesChartInitialized = true;
+            } else if (tabName === 'business' && !window.businessChartInitialized) {
+                initBusinessChart();
+                window.businessChartInitialized = true;
+            } else if (tabName === 'analytics' && !window.distributionChartInitialized) {
+                initDistributionChart();
+                window.distributionChartInitialized = true;
+            }
+        }
+
+        function initStatesChart() {
+            const ctx = document.getElementById('statesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['California', 'Florida', 'Texas', 'New York', 'Georgia'],
+                    datasets: [{
+                        label: 'Number of Loans',
+                        data: [172307, 95167, 84165, 70513, 37746],
+                        backgroundColor: [
+                            'rgba(37, 99, 235, 0.8)',
+                            'rgba(245, 87, 108, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(139, 92, 246, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(37, 99, 235, 1)',
+                            'rgba(245, 87, 108, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(139, 92, 246, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initBusinessChart() {
+            const ctx = document.getElementById('businessChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Regular (R)', 'Proprietorships (PR)', 'Minority-owned (MR)', 'Partnerships (P)'],
+                    datasets: [{
+                        data: [738407, 231197, 19181, 6624],
+                        backgroundColor: [
+                            'rgba(37, 99, 235, 0.8)',
+                            'rgba(245, 87, 108, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(37, 99, 235, 1)',
+                            'rgba(245, 87, 108, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function initDistributionChart() {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Under $50K', '$50K-$100K', '$100K-$150K', 'Over $150K'],
+                    datasets: [{
+                        label: 'Number of Loans',
+                        data: [502832, 169051, 173526, 150000],
+                        backgroundColor: 'rgba(37, 99, 235, 0.8)',
+                        borderColor: 'rgba(37, 99, 235, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate counters after a short delay
+            setTimeout(animateCounters, 500);
+            
+            // Initialize overview charts
+            setTimeout(() => {
+                initializeCharts('overview');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
